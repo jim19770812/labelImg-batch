@@ -1,15 +1,6 @@
-dog
-person
-cat
-tv
-car
-meatballs
-marinara sauce
-tomato soup
-chicken noodle soup
-french onion soup
-chicken breast
-ribs
-pulled pork
-hamburger
-cavity
+等待
+关闭
+双倍奖励看视频
+前进
+无操作拖动滑块
+有错误

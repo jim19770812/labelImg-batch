@@ -9,47 +9,31 @@ import sys
 import webbrowser as wb
 from functools import partial
 
-try:
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
-except ImportError:
-    # needed for py3+qt4
-    # Ref:
-    # http://pyqt.sourceforge.net/Docs/PyQt4/incompatible_apis.html
-    # http://stackoverflow.com/questions/21217399/pyqt4-qtcore-qvariant-object-instead-of-a-string
-    if sys.version_info.major >= 3:
-        import sip
-        sip.setapi('QVariant', 2)
-    from PyQt4.QtGui import *
-    from PyQt4.QtCore import *
-
-from libs.combobox import ComboBox
-from libs.default_label_combobox import DefaultLabelComboBox
-from libs.resources import *
-from libs.constants import *
-from libs.utils import *
-from libs.settings import Settings
-from libs.shape import Shape, DEFAULT_LINE_COLOR, DEFAULT_FILL_COLOR
-from libs.stringBundle import StringBundle
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from libs.canvas import Canvas
-from libs.zoomWidget import ZoomWidget
-from libs.lightWidget import LightWidget
-from libs.labelDialog import LabelDialog
 from libs.colorDialog import ColorDialog
-from libs.labelFile import LabelFile, LabelFileError, LabelFileFormat
-from libs.toolBar import ToolBar
-from libs.pascal_voc_io import PascalVocReader
-from libs.pascal_voc_io import XML_EXT
-from libs.yolo_io import YoloReader
-from libs.yolo_io import TXT_EXT
-from libs.create_ml_io import CreateMLReader
-from libs.create_ml_io import JSON_EXT
-from libs.ustr import ustr
+from libs.combobox import ComboBox
+from libs.constants import *
+from libs.create_ml_io import JSON_EXT, CreateMLReader
+from libs.default_label_combobox import DefaultLabelComboBox
 from libs.hashableQListWidgetItem import HashableQListWidgetItem
+from libs.labelDialog import LabelDialog
+from libs.labelFile import LabelFile, LabelFileError, LabelFileFormat
+from libs.lightWidget import LightWidget
+from libs.pascal_voc_io import XML_EXT, PascalVocReader
+from libs.resources import *
+from libs.settings import Settings
+from libs.shape import DEFAULT_FILL_COLOR, DEFAULT_LINE_COLOR, Shape
+from libs.stringBundle import StringBundle
+from libs.toolBar import ToolBar
+from libs.ustr import ustr
+from libs.utils import *
+from libs.yolo_io import TXT_EXT, YoloReader
+from libs.zoomWidget import ZoomWidget
 
 __appname__ = 'labelImg'
-
 
 class WindowMixin(object):
 
@@ -163,11 +147,17 @@ class MainWindow(QMainWindow, WindowMixin):
         self.label_list.itemChanged.connect(self.label_item_changed)
         list_layout.addWidget(self.label_list)
 
-
-
         self.dock = QDockWidget(get_str('boxLabelText'), self)
         self.dock.setObjectName(get_str('labels'))
         self.dock.setWidget(label_list_container)
+
+        # self.batch_mark_button.stateChanged.connect(self.button_state)
+        self.batch_label_button = QPushButton("批量应用当前标注区域到所有图片并自动保存")
+        # self.batch_label_button.stateChanged.connect(self.batch_label_button_state)
+        # self.batch_mark_button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        self.batch_label_button.clicked.connect(self.batch_label_button_click)
+        # self.batch_label_button.setEnabled(False)
+        list_layout.addWidget(self.batch_label_button)
 
         self.file_list_widget = QListWidget()
         self.file_list_widget.itemDoubleClicked.connect(self.file_item_double_clicked)
@@ -539,6 +529,41 @@ class MainWindow(QMainWindow, WindowMixin):
         if self.file_path and os.path.isdir(self.file_path):
             self.open_dir_dialog(dir_path=self.file_path, silent=True)
 
+    def batch_label_button_click(self, button):
+        print(f"currentRow={self.file_list_widget.currentRow()}")
+        if not len(self.m_img_list):
+            QMessageBox.about(self, "警告", "请先打开图片目录")
+            return
+        if not self.default_save_dir:
+            QMessageBox.about(self, "警告", "请先设置标记的存放目录")
+            return
+        if self.default_save_dir != self.last_open_dir:
+            QMessageBox.about(self, "警告", "批量处理时图片目录和标记的存放目录必须是相同的目录")
+            return
+        if not len(self.canvas.shapes):
+            QMessageBox.about(self, "警告", "请先添加区块")
+            return
+        ##先保存当前图片
+        if self.dirty:
+            self.save_file(False)
+
+        old_file_path:str=self.file_path
+        try:
+            current_index = self.m_img_list.index(self.file_path)
+            if current_index < 0:
+                return
+            prev_file_path = self.m_img_list[current_index]
+            for i in range(len(self.m_img_list)):
+                self.file_path:str=self.m_img_list[i]
+                if not self.file_path:
+                    continue
+                self.load_file(self.file_path)
+                self.show_bounding_box_from_annotation_file(prev_file_path)
+                self.save_file()
+        finally:
+            self.file_path=old_file_path
+            self.set_clean()
+
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_Control:
             self.canvas.set_drawing_shape_to_square(False)
@@ -795,6 +820,13 @@ class MainWindow(QMainWindow, WindowMixin):
                 self.canvas.set_shape_visible(shape, item.checkState() == Qt.Checked)
         except:
             pass
+
+    def batch_label_button_state(self, item=None):
+        if self.canvas.editing():
+            return
+        if not self.file_list_widget.isSelectionRectVisible():
+            return
+        # if self.file_list_widget.get
 
     # React to canvas signals.
     def shape_selection_changed(self, selected=False):
@@ -1306,7 +1338,7 @@ class MainWindow(QMainWindow, WindowMixin):
         if dir_path is not None and len(dir_path) > 1:
             self.default_save_dir = dir_path
 
-        self.show_bounding_box_from_annotation_file(self.file_path)
+        self.show_bounding_box_from_annotation_file(dir_path)
 
         self.statusBar().showMessage('%s . Annotation will be saved to %s' %
                                      ('Change saved folder', self.default_save_dir))
@@ -1656,11 +1688,15 @@ class MainWindow(QMainWindow, WindowMixin):
         self.canvas.verified = create_ml_parse_reader.verified
 
     def copy_previous_bounding_boxes(self):
+        """
+        粘贴前一个区块
+        """
         current_index = self.m_img_list.index(self.file_path)
         if current_index - 1 >= 0:
             prev_file_path = self.m_img_list[current_index - 1]
             self.show_bounding_box_from_annotation_file(prev_file_path)
             self.save_file()
+            self.set_dirty()
 
     def toggle_paint_labels_option(self):
         for shape in self.canvas.shapes:

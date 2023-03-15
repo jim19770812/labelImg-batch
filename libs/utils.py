@@ -1,19 +1,15 @@
-from math import sqrt
-from libs.ustr import ustr
 import hashlib
 import re
 import sys
+from math import sqrt
 
-try:
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
-    QT5 = True
-except ImportError:
-    from PyQt4.QtGui import *
-    from PyQt4.QtCore import *
-    QT5 = False
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
+from libs.ustr import ustr
+
+QT5 = True
 
 def new_icon(icon):
     return QIcon(':/' + icon)

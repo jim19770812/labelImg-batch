@@ -1,3 +1,5 @@
+python: 3.7.9
+
 .. image:: /readme/images/labelimg.png
         :target: https://github.com/heartexlabs/label-studio
 
@@ -314,4 +316,3 @@ Stargazers over time
 ~~~~~~~~~~~~~~~~~~~~
 
 .. image:: https://starchart.cc/tzutalin/labelImg.svg
-

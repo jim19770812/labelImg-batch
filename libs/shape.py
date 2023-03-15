@@ -2,15 +2,12 @@
 # -*- coding: utf-8 -*-
 
 
-try:
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-except ImportError:
-    from PyQt4.QtGui import *
-    from PyQt4.QtCore import *
+import sys
+
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
 from libs.utils import distance
-import sys
 
 DEFAULT_LINE_COLOR = QColor(0, 255, 0, 128)
 DEFAULT_FILL_COLOR = QColor(255, 0, 0, 128)

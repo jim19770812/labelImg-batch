@@ -1,13 +1,7 @@
 
-try:
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
-except ImportError:
-    from PyQt4.QtGui import *
-    from PyQt4.QtCore import *
-
-# from PyQt4.QtOpenGL import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from libs.shape import Shape
 from libs.utils import distance
@@ -467,7 +461,8 @@ class Canvas(QWidget):
         if self.selected_shape:
             shape = self.selected_shape
             self.un_highlight(shape)
-            self.shapes.remove(self.selected_shape)
+            if self.selected_shape in self.shapes:
+                self.shapes.remove(self.selected_shape)
             self.selected_shape = None
             self.update()
             return shape

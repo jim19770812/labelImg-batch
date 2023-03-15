@@ -5,19 +5,14 @@ if items were added in files in the resources/strings folder,
 then execute "pyrcc5 resources.qrc -o resources.py" in the root directory
 and execute "pyrcc5 ../resources.qrc -o resources.py" in the libs directory
 """
-import re
-import os
-import sys
 import locale
-from libs.ustr import ustr
+import os
+import re
+import sys
 
-try:
-    from PyQt5.QtCore import *
-except ImportError:
-    if sys.version_info.major >= 3:
-        import sip
-        sip.setapi('QVariant', 2)
-    from PyQt4.QtCore import *
+from PyQt5.QtCore import *
+
+from libs.ustr import ustr
 
 
 class StringBundle:
