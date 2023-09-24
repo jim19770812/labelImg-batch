@@ -9,9 +9,7 @@ import sys
 import webbrowser as wb
 from functools import partial
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+
 from libs.canvas import Canvas
 from libs.colorDialog import ColorDialog
 from libs.combobox import ComboBox
