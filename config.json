@@ -1,0 +1,17 @@
+{
+  "auto-object-detected-server": {
+    "url": "http://127.0.0.1:8888/givvy-shorts",
+    "threshold": 0.55,
+    "class_indexs": {
+      "0_extra_bonus_watch_video_and_double_up": 0,
+      "1_extra_bonus_create": 0,
+      "2_error": 0,
+      "3_forward": 0,
+      "4_watch": 0,
+      "5_slide": 0,
+      "6_ok": 0,
+      "7_waiting": 0,
+      "8_close": 0
+    }
+  }
+}

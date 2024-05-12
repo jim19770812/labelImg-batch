@@ -4,3 +4,5 @@ PyQt5-Qt5==5.15.2
 PyQt5-sip==12.11.1
 PyYAML==6.0
 ruamel.yaml.clib==0.2.7
+requests==2.31.0
+pandas

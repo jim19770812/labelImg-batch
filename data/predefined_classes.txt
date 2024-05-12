@@ -1,6 +1,9 @@
-等待
-关闭
-双倍奖励看视频
-前进
-无操作拖动滑块
-有错误
+0_extra_bonus_watch_video_and_double_up
+1_extra_bonus_create
+2_error
+3_forward
+4_watch
+5_slide
+6_ok
+7_waiting
+8_close
