@@ -107,8 +107,8 @@ class MainWindow(QMainWindow, WindowMixin):
         self.shapes_to_items = {}
         self.prev_label_text = ''
 
-        list_layout = QVBoxLayout()
-        list_layout.setContentsMargins(0, 0, 0, 0)
+        main_list_layout = QVBoxLayout()
+        main_list_layout.setContentsMargins(0, 0, 0, 0)
 
         # Create a widget for using default label
         self.use_default_label_checkbox = QCheckBox(get_str('useDefaultLabel'))
@@ -129,24 +129,24 @@ class MainWindow(QMainWindow, WindowMixin):
         self.edit_button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
         # Add some of widgets to list_layout
-        list_layout.addWidget(self.edit_button)
-        list_layout.addWidget(self.diffc_button)
-        list_layout.addWidget(use_default_label_container)
+        main_list_layout.addWidget(self.edit_button)
+        main_list_layout.addWidget(self.diffc_button)
+        main_list_layout.addWidget(use_default_label_container)
 
         # Create and add combobox for showing unique labels in group
         self.combo_box = ComboBox(self)
-        list_layout.addWidget(self.combo_box)
+        main_list_layout.addWidget(self.combo_box)
 
         # Create and add a widget for showing current label items
         self.label_list = QListWidget()
         label_list_container = QWidget()
-        label_list_container.setLayout(list_layout)
+        label_list_container.setLayout(main_list_layout)
         self.label_list.itemActivated.connect(self.label_selection_changed)
         self.label_list.itemSelectionChanged.connect(self.label_selection_changed)
         self.label_list.itemDoubleClicked.connect(self.edit_label)
         # Connect to itemChanged to detect checkbox changes.
         self.label_list.itemChanged.connect(self.label_item_changed)
-        list_layout.addWidget(self.label_list)
+        main_list_layout.addWidget(self.label_list)
 
         self.dock = QDockWidget(get_str('boxLabelText'), self)
         self.dock.setObjectName(get_str('labels'))
@@ -158,7 +158,7 @@ class MainWindow(QMainWindow, WindowMixin):
         # self.batch_mark_button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.batch_label_button.clicked.connect(self.batch_label_button_click)
         # self.batch_label_button.setEnabled(False)
-        list_layout.addWidget(self.batch_label_button)
+        main_list_layout.addWidget(self.batch_label_button)
         self.file_list_widget = QListWidget()
         self.file_list_widget.itemDoubleClicked.connect(self.file_item_double_clicked)
         file_list_layout = QVBoxLayout()
@@ -464,14 +464,17 @@ class MainWindow(QMainWindow, WindowMixin):
         if self.file_path and path.isdir(self.file_path):
             self.open_dir_dialog(dir_path=self.file_path, silent=True)
 
-        auto_label_container=QGroupBox("自动标注")
-        auto_lable_layout=QVBoxLayout()
-        auto_label_container.setLayout(auto_lable_layout)
-        self.auto_label_button = QPushButton("自动标注")
-        self.auto_label_button.clicked.connect(self.auto_label)
-        auto_lable_layout.addWidget(self.auto_label_button)
-        list_layout.addWidget(auto_label_container)
+        def create_auto_label_widget()->QWidget:
+            auto_label_group_box=QGroupBox("自动标注")
+            auto_lable_layout=QVBoxLayout()
+            auto_label_group_box.setLayout(auto_lable_layout)
+            self.auto_label_button = QPushButton("执行标注")
+            self.auto_label_button.clicked.connect(self.auto_label)
+            auto_lable_layout.addWidget(self.auto_label_button)
+            return auto_label_group_box
 
+        widget:QWidget=create_auto_label_widget()
+        main_list_layout.addWidget(widget)
 
     def batch_label_button_click(self, button):
         print(f"currentRow={self.file_list_widget.currentRow()}")
